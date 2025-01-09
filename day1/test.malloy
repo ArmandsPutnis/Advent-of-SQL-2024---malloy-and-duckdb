@@ -1,6 +1,0 @@
-source: children is duckdb.table('children_202501071203.csv') extend {
-    measure:
-      count_children is count(child_id)
-      avg_children_age is avg(age)
-    primary_key: child_id
-}
