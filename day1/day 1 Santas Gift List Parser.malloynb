@@ -4,14 +4,14 @@ https://adventofsql.com/challenges/1
 ![alt text](image.png)
 >>>malloy
 
-source: children is duckdb.table('../Advent of SQL 2024 - malloy and duckdb/data/day1/children_202501071203.csv') extend {
+source: children is duckdb.table('children_202501071203.csv') extend {
     measure:
       count_children is count(child_id)
       avg_children_age is avg(age)
     primary_key: child_id
 }
 >>>malloy
-source: toy_catalogue is duckdb.table('../Advent of SQL 2024 - malloy and duckdb/data/day1//toy_catalogue_202501071203.csv') extend {
+source: toy_catalogue is duckdb.table('toy_catalogue_202501071203.csv') extend {
     measure:
       total_toys_in_workshop is count(toy_id)
     dimension:
@@ -39,7 +39,7 @@ source: wish_lists is duckdb.sql("""
       REPLACE(wishes ->> '$.second_choice', '"', '') AS backup_wish,
       REPLACE(wishes ->> '$.colors[0]', '"', '') AS favorite_color,
       JSON_ARRAY_LENGTH(wishes -> '$.colors') AS color_count
-    FROM '../Advent of SQL 2024 - malloy and duckdb/data/day1/wish_lists_202501071203.csv'
+    FROM 'wish_lists_202501071203.csv'
 
 
  """) extend {
