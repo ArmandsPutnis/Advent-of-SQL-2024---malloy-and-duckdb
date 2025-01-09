@@ -3,7 +3,7 @@ https://adventofsql.com/challenges/1
 
 ![alt text](image.png)
 >>>malloy
->>>malloy
+
 source: children is duckdb.table('../Advent of SQL 2024 - malloy and duckdb/data/day1/children_202501071203.csv') extend {
     measure:
       count_children is count(child_id)
