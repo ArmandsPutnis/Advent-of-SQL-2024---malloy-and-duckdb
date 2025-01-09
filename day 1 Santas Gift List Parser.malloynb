@@ -1,7 +1,7 @@
 >>>markdown
 https://adventofsql.com/challenges/1
 >>>sql
-/// Load the sample data into the database, replace the table _sample to checl the answer
+/// Load the sample data into the database, replace the table _sample to check the answer
 --- connection: duckdb
 
  CREATE OR REPLACE TABLE children_sample (
