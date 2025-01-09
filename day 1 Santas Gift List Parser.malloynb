@@ -1,7 +1,7 @@
 >>>markdown
 https://adventofsql.com/challenges/1
 >>>sql
-/// Load the sample data into the database, replace the table_sample
+/// Load the sample data into the database, replace the table _sample to checl the answer
 --- connection: duckdb
 
  CREATE OR REPLACE TABLE children_sample (
@@ -83,7 +83,7 @@ source: wish_lists is duckdb.sql("""
 
  }
 >>>malloy
-/// Answer to the question
+/// Answer to the question withe the _sampe data
 run: wish_lists -> {
    group_by: children.child_id, children.name
       primary_wish
