@@ -1,5 +1,10 @@
 >>>malloy
+
+import 'test.malloy'
+>>>malloy
 // Connection name is duck
+
+
 
 \>>>sql connection:duck
  CREATE TABLE children (
