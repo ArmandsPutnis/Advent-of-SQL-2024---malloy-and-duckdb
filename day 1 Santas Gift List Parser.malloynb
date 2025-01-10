@@ -1,8 +1,12 @@
 >>>markdown
 https://adventofsql.com/challenges/1
 >>>sql
---- connection: duckdb
- CREATE OR REPLACE TABLE children_sample (
+--- connection: duck
+select version() as duckdb_version
+>>>sql
+--- connection: duck
+
+CREATE OR REPLACE TABLE children_sample (
       child_id INT PRIMARY KEY,
       name VARCHAR(100),
       age INT
@@ -36,15 +40,14 @@ INSERT INTO children_sample VALUES
   (3, 'doll', 'indoor', 2),
   (4, 'books', 'educational', 1);
 >>>malloy
-
-source: children is duckdb.table('main.children_sample') extend {
+source: children is duck.table('children_sample') extend {
     measure:
       count_children is count(child_id)
       avg_children_age is avg(age)
     primary_key: child_id
 }
 >>>malloy
-source: toy_catalogue is duckdb.table('toy_catalogue_sample') extend {
+source: toy_catalogue is duck.table('toy_catalogue_sample') extend {
     measure:
       total_toys_in_workshop is count(toy_id)
     dimension:
@@ -62,7 +65,8 @@ source: toy_catalogue is duckdb.table('toy_catalogue_sample') extend {
   primary_key: toy_id
 }
 >>>malloy
-source: wish_lists is duckdb.sql("""
+--- connection: duckdb
+source: wish_lists is duck.sql("""
     SELECT list_id,
       child_id,
       wishes,
