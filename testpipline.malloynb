@@ -25,10 +25,4 @@ source: test is duckdb.sql("""SELECT *  FROM children_test)
 >>>sql
 %{
   source: raw_children_test is duckdb.table('children_test')
-%}
-
-// Now you can use the source in your queries
-query: my_query -> {
-  from: raw_children_test
-  // ... rest of your query
 }
