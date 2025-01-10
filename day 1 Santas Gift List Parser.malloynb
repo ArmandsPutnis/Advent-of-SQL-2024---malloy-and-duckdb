@@ -2,7 +2,7 @@
 https://adventofsql.com/challenges/1
 >>>sql
 --- connection: duck
-select version() as duckdb_version
+select current_database() as duckdb_db
 >>>sql
 --- connection: duck
 

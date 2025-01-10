@@ -1,0 +1,34 @@
+>>>sql
+--- connection: duckdb
+select current_database() as duckdb_database;
+>>>sql
+--- connection: duckdb
+select current_database() as duckdb_database;
+>>>sql
+CREATE OR REPLACE TABLE children_test (
+      child_id INT PRIMARY KEY,
+      name VARCHAR(100),
+      age INT
+  );
+
+  INSERT INTO children_test VALUES
+  (1, 'Tommy', 8),
+  (2, 'Sally', 7),
+  (3, 'Bobby', 9);
+>>>malloy
+source: test is duckdb.sql("""FROM children_test""")
+>>>malloy
+source: raw_children_test is duck.table('children_test')
+>>>malloy
+source: test is duckdb.sql("""SELECT *  FROM children_test)
+""")
+>>>sql
+%{
+  source: raw_children_test is duckdb.table('children_test')
+%}
+
+// Now you can use the source in your queries
+query: my_query -> {
+  from: raw_children_test
+  // ... rest of your query
+}
