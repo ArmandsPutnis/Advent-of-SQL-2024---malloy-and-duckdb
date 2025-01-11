@@ -3,11 +3,13 @@ https://adventofsql.com/challenges/1
 >>>sql
 --- connection: duck
 select current_database() as duckdb_db
+>>>sql
+// data should be loaded already in the duckdb, in case it's not working copy/paste ./sql files/day1.sql and run
 >>>malloy
-// this part is not really nessasary, but it would be eaeier to switch the table name for checking the answer
-source: raw_children is duck.table("children_sample") -- change table name  _sample for checking answer
-source: raw_wish_lists is duck.table("wish_lists_sample") -- change table name  _sample for checking answer
-source: raw_toy_catalogue is duck.table("toy_catalogue_sample") -- change table name  _sample for checking answer
+// this part is not really nessasary, made it for switching the table name - checking the answer
+source: raw_children is duck.table("children") -- change table name  children_sample for checking answer
+source: raw_wish_lists is duck.table("wish_lists") -- change table name  wish_lists_sample for checking answer
+source: raw_toy_catalogue is duck.table("toy_catalogue") -- change table name  toy_catalogue_sample for checking answer
 >>>malloy
 source: children is raw_children extend {
     measure:
@@ -28,10 +30,10 @@ source: toy_catalogue is raw_toy_catalogue extend {
         pick 'Outside Workshop' when category = 'outdoor'
         pick 'Learning Workshop' when category = 'educational'
         else 'General Workshop'
+     primary_key: toy_id
 
 
 
-  primary_key: toy_id
 }
 >>>malloy
 source: wish_lists is raw_wish_lists extend {
@@ -40,13 +42,45 @@ source: wish_lists is raw_wish_lists extend {
       backup_wish is json_extract_string!(wishes, '$.second_choice')::string
       favorite_color is json_extract_string!(wishes, '$.colors[0]')::string
       color_count is json_array_length!(wishes, '$.colors')::number
+    measure:
+      requests is count()
+      total_children_with_wishes is count(child_id)
+      avg_color_count is avg(color_count)
+
     join_one: children with child_id
     join_one: toy_catalogue on toy_catalogue.toy_name = primary_wish
+
+    view: most_popular_primary_wish is {
+      group_by: primary_wish
+      aggregate: requests
+    }
+    view: most_popular_backup_wish is {
+      group_by: backup_wish
+      aggregate: requests
+    }
+    view: favorite_toy_color is {
+      group_by: favorite_color
+      aggregate: requests
+    }
+
+    view: wish_fulfillment_by_department_complexity is {
+      group_by: toy_catalogue.workshop_assignment
+      aggregate: requests
+      nest: complexity is {
+      group_by: toy_catalogue.gift_complexity
+      aggregate: requests
+      }
+
+    }
+
+
 }
 >>>malloy
-/// Answer to the question withe the table _sampe
+/// Answer to the question table_sampe
 run: wish_lists -> {
-   group_by: children.child_id, children.name
+   select:
+      children.child_id
+      children.name
       primary_wish
       backup_wish
       favorite_color
@@ -65,8 +99,30 @@ run: wish_lists -> {
 # Improvisation
 ### let's build santa a dashboard
 >>>malloy
-source: santas_dashboard is wish_lists extend{
-    view: summary {
-
+# dashboard
+run: wish_lists -> {
+    nest:  `Children Details ` is {
+        aggregate:
+         `Total Children` is children.count_children
+         `Average Age` is children.avg_children_age
     }
-}
+    nest:  `Toy Catalogue ` is {
+        group_by : toy_catalogue.gift_complexity
+        aggregate: `Workshop Toys` is toy_catalogue.total_toys_in_workshop
+
+        }
+    nest:  `Toy Production ` is {
+        group_by : toy_catalogue.workshop_assignment
+        aggregate: `Workshop Toys` is toy_catalogue.total_toys_in_workshop
+        }
+
+    nest: `Toy list by Workshop` is {
+
+      group_by:
+        toy_catalogue.workshop_assignment
+      aggregate: toy_catalogue.total_toys_in_workshop
+        nest:
+          toy_catalogue.gift_complexity
+          toy_catalogue.toy_name
+        }
+     }
