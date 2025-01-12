@@ -49,34 +49,9 @@ source: wish_lists is raw_wish_lists extend {
 
     join_one: children with child_id
     join_one: toy_catalogue on toy_catalogue.toy_name = primary_wish
-
-    view: most_popular_primary_wish is {
-      group_by: primary_wish
-      aggregate: requests
-    }
-    view: most_popular_backup_wish is {
-      group_by: backup_wish
-      aggregate: requests
-    }
-    view: favorite_toy_color is {
-      group_by: favorite_color
-      aggregate: requests
-    }
-
-    view: wish_fulfillment_by_department_complexity is {
-      group_by: toy_catalogue.workshop_assignment
-      aggregate: requests
-      nest: complexity is {
-      group_by: toy_catalogue.gift_complexity
-      aggregate: requests
-      }
-
-    }
-
-
 }
 >>>malloy
-/// Answer to the question table_sampe
+/// Answer to the question table _sampe
 run: wish_lists -> {
    select:
       children.child_id
@@ -97,32 +72,79 @@ run: wish_lists -> {
 | Bobby | blocks | bike | green | 1 | Simple Gift | Learning Workshop |
 >>>markdown
 # Improvisation
-### let's build santa a dashboard
+### let's build some ideas for santa a dashboard
 >>>malloy
-# dashboard
-run: wish_lists -> {
-    nest:  `Children Details ` is {
-        aggregate:
+-- only idea did not workout was:
+-- union primary_wish and backup_wish
+-- to get the most requested toy, can you do it?
+source: santas_dashboard is wish_lists extend{
+  view: `Children Database` is {
+            aggregate:
          `Total Children` is children.count_children
          `Average Age` is children.avg_children_age
-    }
-    nest:  `Toy Catalogue ` is {
+  }
+  view: ` Toy Catalogue ` is {
         group_by : toy_catalogue.gift_complexity
-        aggregate: `Workshop Toys` is toy_catalogue.total_toys_in_workshop
-
-        }
-    nest:  `Toy Production ` is {
-        group_by : toy_catalogue.workshop_assignment
-        aggregate: `Workshop Toys` is toy_catalogue.total_toys_in_workshop
-        }
-
-    nest: `Toy list by Workshop` is {
-
-      group_by:
-        toy_catalogue.workshop_assignment
+        aggregate: workshop_toy_count is toy_catalogue.total_toys_in_workshop
+  }
+  view: `Toy list by Workshop` is {
+    group_by: workshop_name is toy_catalogue.workshop_assignment
       aggregate: toy_catalogue.total_toys_in_workshop
-        nest:
-          toy_catalogue.gift_complexity
-          toy_catalogue.toy_name
-        }
-     }
+  }
+    view: most_popular_primary_wish is {
+      group_by: primary_wish
+      aggregate: requests
+    }
+    view: most_popular_backup_wish is {
+      group_by: backup_wish
+      aggregate: requests
+    }
+
+    view: primary_wish_top_5_backup is {
+      group_by: primary_wish
+      aggregate: requests
+
+      nest: top5_backup_list is {
+        group_by: backup_wish
+        aggregate: requests
+        top: 5
+      }
+    }
+
+    view: favorite_toy_color is {
+      group_by: favorite_color
+      aggregate: requests
+    }
+
+    view: requests_month is {
+      group_by: submitted_date.month
+      aggregate: requests
+    }
+
+    view: wish_fulfillment_by_department_complexity is {
+      group_by: toy_catalogue.workshop_assignment
+      aggregate: requests
+      nest: complexity is {
+      group_by: toy_catalogue.gift_complexity
+      aggregate: requests
+      }
+
+    }
+
+}
+# dashboard
+run: santas_dashboard-> {
+   nest:
+     `Children Database`
+     ` Toy Catalogue `
+     `Toy list by Workshop`
+     favorite_toy_color
+     most_popular_primary_wish
+     most_popular_backup_wish
+     primary_wish_top_5_backup
+     wish_fulfillment_by_department_complexity
+     # bar_chart
+     requests_month
+
+}
+>>>malloy
