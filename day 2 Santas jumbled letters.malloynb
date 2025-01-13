@@ -1,0 +1,25 @@
+>>>markdown
+https://adventofsql.com/challenges/2
+>>>sql
+--- connection: duck
+select current_database() as duckdb_db
+>>>sql
+ -- day2.sql copy/pasta (only if the code is not working)
+>>>sql
+-- looks like union is not yet supported in Malloy
+CREATE OR REPLACE TABLE combined_letters AS
+FROM day2.letters_a
+UNION ALL
+FROM day2.letters_b;
+>>>malloy
+source: combined_letters is duck.table('day2.combined_letters') extend {
+    dimension: decode is chr(value)
+    where: decode ~ r'^[A-Za-z ,]$'
+}
+run: combined_letters -> {
+    aggregate: decode_message is string_agg(decode, '')
+}
+>>>markdown
+### decoded_message should be:
+------------------
+Dear Santa, I would like a Pony for Christmas, Love Susie
