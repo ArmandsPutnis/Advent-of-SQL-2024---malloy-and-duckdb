@@ -12,12 +12,15 @@ FROM day2.letters_a
 UNION ALL
 FROM day2.letters_b;
 >>>malloy
+
+##! experimental{ aggregate_order_by}
+
 source: combined_letters is duck.table('day2.combined_letters') extend {
     dimension: decode is chr(value)
     where: decode ~ r'^[A-Za-z ,]$'
 }
 run: combined_letters -> {
-    aggregate: decode_message is string_agg(decode, '')
+    aggregate: decode_message is string_agg(decode, '') {order_by: id}
 }
 >>>markdown
 ### decoded_message should be:
