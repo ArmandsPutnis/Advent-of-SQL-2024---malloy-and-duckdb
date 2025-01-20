@@ -1,0 +1,33 @@
+>>>markdown
+https://adventofsql.com/challenges/4 
+I use the full dataset for interesting analytical use cases; otherwise, I sample the data.
+>>>sql
+--- connection: duck
+select current_database() as duckdb_db
+>>>sql
+--CREATE SCHEMA day4;
+USE day4;
+
+
+CREATE OR REPLACE TABLE toy_production (
+  toy_id INT,
+  toy_name VARCHAR(100),
+  previous_tags VARCHAR[],
+  new_tags VARCHAR[]
+);
+
+INSERT INTO toy_production VALUES
+(1, 'Robot', ['fun', 'battery'], ['smart', 'battery', 'educational', 'scientific']),
+(2, 'Doll', ['cute', 'classic'], ['cute', 'collectible', 'classic']),
+(3, 'Puzzle', ['brain', 'wood'], ['educational', 'wood', 'strategy']);
+>>>sql
+
+FROM day4.toy_production
+>>>markdown
+![alt text](image.png)
+>>>malloy
+source: toy_production is duck.table('day4.toy_production') extend {
+}
+run: toy_production -> {
+    group_by: toy_id
+}
