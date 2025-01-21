@@ -1,0 +1,35 @@
+>>>sql
+--- connection: duck
+select current_database() as duckdb_db
+>>>sql
+FROM day5.toy_production_sample
+>>>sql
+FROM day5.toy_production
+>>>malloy
+-- chose one:  toy_production is for dashboard and _sample is for answer.
+source: toy_production is duck.table('day5.toy_production_sample')
+-- source: toy_production is duck.table('day5.toy_production')
+>>>malloy
+source: final_toy_production is toy_production extend {
+  primary_key: production_date
+  measure: total_toys_produced is toys_produced.sum()
+
+
+  view: toy_production_view is {
+    group_by: production_date, toys_produced
+    calculate:
+      previous_day_production is lag(total_toys_produced, 1)
+      production_change is toys_produced - previous_day_production
+      production_change_percentage is round(production_change * 100.0 / previous_day_production, 2)
+      order_by: production_date
+}
+
+
+}
+>>>malloy
+run: final_toy_production -> toy_production_view -> {select:production_date; limit:1; order_by: 1}
+
+--- stuck . all i need is to sort by production_change_percentage, but it's not available.
+>>>markdown
+Solution to submit:
+2024-12-21
