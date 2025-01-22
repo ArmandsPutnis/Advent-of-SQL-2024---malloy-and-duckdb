@@ -24,12 +24,11 @@ source: final_toy_production is toy_production extend {
       order_by: production_date
 }
 
-
 }
 >>>malloy
-run: final_toy_production -> toy_production_view -> {select:production_date; limit:1; order_by: 1}
-
---- stuck . all i need is to sort by production_change_percentage, but it's not available.
+run: final_toy_production
+  -> toy_production_view
+  -> {select:production_date, production_change_percentage;  limit:1; order_by: production_change_percentage desc}
 >>>markdown
 Solution to submit:
 2024-12-21
