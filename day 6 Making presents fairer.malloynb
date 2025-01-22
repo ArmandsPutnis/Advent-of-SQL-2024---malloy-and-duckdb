@@ -1,0 +1,85 @@
+>>>sql
+--- connection: duck
+select current_database() as duckdb_db
+>>>markdown
+Problem: Santa's elves have reported an issue with gift distribution fairness. Some children are receiving gifts far more expensive than others in their neighborhood. Santa wants to ensure a more equitable distribution by identifying these cases. He needs to find all children who received gifts that are more expensive than the average gift price in the North Pole's gift database, so he can review and adjust the distribution plan accordingly.
+>>>sql
+-- Manualy added id's
+-- CREATE SCHEMA day6;
+USE day6;
+
+
+DROP TABLE IF EXISTS children_sample CASCADE;
+DROP TABLE IF EXISTS gifts_sample CASCADE;
+
+CREATE TABLE children_sample (
+    child_id INTEGER,
+    name VARCHAR(100),
+    age INTEGER,
+    city VARCHAR(100)
+);
+
+CREATE TABLE gifts_sample (
+    gift_id INTEGER,
+    name VARCHAR(100),
+    price DECIMAL(10,2),
+    child_id INTEGER
+);
+
+INSERT INTO children_sample (child_id, name, age, city) VALUES
+    (1, 'Tommy', 8, 'London'),
+    (2, 'Sarah', 7, 'London'),
+    (3, 'James', 9, 'Paris'),
+    (4, 'Maria', 6, 'Madrid'),
+    (5, 'Lucas', 10, 'Berlin');
+
+INSERT INTO gifts_sample (gift_id, name, price, child_id) VALUES
+    (1, 'Robot Dog', 45.99, 1),
+    (2, 'Paint Set', 15.50, 2),
+    (3, 'Gaming Console', 299.99, 3),
+    (4, 'Book Collection', 25.99, 4),
+    (5, 'Chemistry Set', 109.99, 5);
+>>>sql
+FROM day6.children_sample
+>>>sql
+FROM day6.gifts_sample
+>>>markdown
+The challenge: Write a query that returns the name of each child and the name and price of their gift, but only for children who received gifts more expensive than the average gift price.
+The results should be ordered by the gift price in ascending order.
+
+Give the name of the child with the first gift thats higher than the average.
+>>>malloy
+
+source: children is duck.table('day6.children_sample') extend {
+	primary_key: child_id
+	rename: child_name is name
+
+}
+source: gifts is duck.table('day6.gifts_sample') extend {
+	rename:
+		gift_name is name
+		gift_price is price
+	measure: avg_gift_price is gift_price.avg()
+	join_one: children with child_id
+}
+>>>malloy
+run: gifts -> {
+	aggregate: avg_gift_price
+}
+>>>malloy
+run: gifts -> {
+	group_by: children.child_name, gift_name, gift_price;
+	aggregate: avg_gift_price
+	where: gift_price > avg_gift_price
+	}
+>>>markdown
+Example solution
+| child_name | gift_name | gift_price |
+|---|---|---|
+| Lucas | Chemistry Set | 109.99 |
+| James | Gaming Console | 299.99 |
+
+
+Solution to submit
+Lucas
+The reason is because the average gift price is 99.492.
