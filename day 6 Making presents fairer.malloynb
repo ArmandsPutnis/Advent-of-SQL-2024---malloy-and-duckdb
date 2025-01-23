@@ -69,7 +69,7 @@ run: gifts -> {
 >>>malloy
 run: gifts -> {
 	group_by: children.child_name, gift_name, gift_price;
-	aggregate: avg_gift_price
+
 	where: gift_price > avg_gift_price
 	}
 >>>markdown
